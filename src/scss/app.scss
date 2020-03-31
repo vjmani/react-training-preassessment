@@ -1,0 +1,15 @@
+@import "~bootstrap/scss/bootstrap";
+@import "colors.scss";
+@import "common.scss";
+@import "main.scss";
+@import "filters.scss";
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+}

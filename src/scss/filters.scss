@@ -1,0 +1,18 @@
+.filters {
+    display: flex;
+    flex-flow: column;
+    padding: 20px;
+
+    .filter-box {
+        border: 1px solid $grey-3;
+        height: auto;
+        min-height: 200px;
+        margin-bottom: 10px;
+
+        &-section {
+            display: flex;
+            flex-flow: column;
+            width: 100%;
+        }
+    }
+}

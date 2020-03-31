@@ -1,0 +1,41 @@
+{
+  "name": "excersise-vijay",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/main.js",
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack-dev-server",
+    "tests": "karma start"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "autoprefixer": "^9.7.4",
+    "babel-loader": "^8.0.6",
+    "babel-preset-es2015": "^6.24.1",
+    "css-loader": "^3.4.2",
+    "exports-loader": "^0.7.0",
+    "jasmine-core": "^3.5.0",
+    "karma": "^4.4.1",
+    "karma-jasmine": "^3.1.1",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-webpack": "^4.0.2",
+    "node-sass": "^4.13.1",
+    "phantomjs-prebuilt": "^2.1.16",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^8.0.2",
+    "style-loader": "^1.1.3",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.8.3",
+    "bootstrap": "^4.4.1",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.1"
+  }
+}
