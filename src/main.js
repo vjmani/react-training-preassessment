@@ -4,50 +4,117 @@ import $ from 'jquery';
 import * as account from './modules/accounts';
 
 (function($) {
+        
+    const species = new Set();
+    const gender = new Set();
+    const origin = new Set();
 
-    const accounts = account.getAccounts();    
+    const resultApi = 'https://rickandmortyapi.com/api/character/';
 
-    // To display table on load
-    const loadTable = (accountData) => {
-        const tableRows = account.loadTableData(accountData);
-        $('#account-table tbody').html(tableRows);
-    }
-    
-    // To show totale value on table
-    const showTotalValues = (accountData) => {
-        const totalmarketValue = account.getTotalToDisplay(accountData, 'marketValue');
-        const totalCash = account.getTotalToDisplay(accountData, 'cash');
-        $('#account-table tfoot #total-market-value').html(`$${totalmarketValue}`);
-        $('#account-table tfoot #total-cash').html(`$${totalCash}`);
-    }
-    
-    loadTable(accounts);
-    showTotalValues(accounts);
 
-    // Form submission
-    $('#add-account-form').click(() => {        
-        $('.account-form-error').hide();
-        const accountNameEntered = account.isValidField($('#add-account-form #accountName'));
-        const marketValueEntered = account.isValidField($('#add-account-form #marketValue'));
-        const cashEntered = account.isValidField($('#add-account-form #cash'));
-        if (accountNameEntered && marketValueEntered && cashEntered) {            
-            const newAccount = {
-                accountName: accountNameEntered,
-                marketValue: Number(marketValueEntered),
-                cash: Number(cashEntered),
-                legend: 1
-            }
+    async function getResults() {
 
-            // Hide modal on successfull form submit            
-            $('#accounFormModal').modal('hide');
-
-            // Creating new account on Run time, since there is no server
-            accounts.push(newAccount);
-            loadTable(accounts);
-            showTotalValues(accounts);
-        } else {
-            $('.account-form-error').show();
+        let promise = new Promise((resolve, reject) => {
+            $.get(resultApi, function( data ) {
+                if(data && data.results) {
+                    resolve(setUIdata(data.results));                    
+                } else {
+                    reject('Something Went Wrong.');
+                }
+            });
+        });
+        
+        const result = await promise;
+        const filters = {
+            species : [...result.filters.species],
+            gender : [...result.filters.gender],
+            origin : [...result.filters.origin]
         }
-    })
+
+        populateFilters(filters.species, '#species-filter');
+        populateFilters(filters.gender, '#gender-filter');
+        populateFilters(filters.origin, '#origin-filter');
+
+        console.log(result.card);
+
+        populateCardData(result.card);
+    }
+
+    getResults(); 
+    
+    const setUIdata = (data) => {
+        const res = {};
+        res['card'] = data;
+        data.map((item) => {
+            res['filters'] = addFilters(item);
+        });
+        console.log(res);
+        return res;
+    }
+
+    const addFilters = (item) => {
+        species.add(item.species);
+        gender.add(item.gender);
+        origin.add(item.origin.name);
+
+        return {
+            species,
+            gender,
+            origin
+        };
+    }
+
+    const populateFilters = (filterData, filterType) => {
+        filterData.map((filter) => {
+            $(filterType).append(`
+                <label for="${filter}">
+                    <input type="checkbox" name="${filter}" value="${filter}" id="${filter}" /> ${filter}
+                </label>
+            `);
+        });
+    }
+
+    const populateCardData = (items) => {
+        const cards = $('.search-results');
+        cards.html('');
+        items.map((item) => {
+            cards.append(`
+                <div class="col-lg-3 col-6">
+                    <div class="result-card">
+                        <figure>
+                            <img class="responsive-img" src="${item.image}" alt="${item.name}">
+                            <figcaption>
+                                <h3>${item.name}</h3>
+                                <div class="small-font">id: <span>${item.id}</span> - created <span>2 years ago</span></div>
+                            </figcaption>
+                        </figure>
+                        <div class="result-card-details small-font">
+                            <div class="result-attribute">
+                                <span class="result-attribute-name">STATUS</span>
+                                <span class="result-attribute-data">${item.status}</span>
+                            </div>
+                            <div class="result-attribute">
+                                <span class="result-attribute-name">SPECIES</span>
+                                <span class="result-attribute-data">${item.species}</span>
+                            </div>
+                            <div class="result-attribute">
+                                <span class="result-attribute-name">GENDER</span>
+                                <span class="result-attribute-data">${item.gender}</span>
+                            </div>
+                            <div class="result-attribute">
+                                <span class="result-attribute-name">ORIGIN</span>
+                                <span class="result-attribute-data">${item.origin.name}</span>
+                            </div>
+                            <div class="result-attribute">
+                                <span class="result-attribute-name">LAST LOCATION</span>
+                                <span class="result-attribute-data">${item.location.name}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
 })($);
 

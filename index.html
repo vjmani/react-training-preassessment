@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>React Training Preassessment Exercise</title>
+    <title>React Training Pre-assessment Exercise</title>
     <link href="main.css">
 </head>
 
@@ -16,38 +16,20 @@
                 <form>
                     <div class="col-lg-12 col-12 filter-box">
                         <h2>Species</h2>
-                        <div class="filter-box-section">
-                            <label for="human">
-                                <input type="checkbox" name="human" value="Human" id="human" /> Human
-                            </label>
-                            <label>
-                                <input type="checkbox" name="mytholog" value="Mytholog" id="mytholog" /> Mytholog
-                            </label>
-                            <label>
-                                <input type="checkbox" name="other" value="other" id="other" /> Other Species
-                            </label>
+                        <div class="filter-box-section" id="species-filter">
+                            <!-- Species Filter will be displayed here -->
                         </div>
                     </div>
                     <div class="col-lg-12 col-12 filter-box">
                         <h2>Gender</h2>
-                        <div class="filter-box-section">
-                            <label>
-                                <input type="checkbox" name="male" value="Male" id="male" /> Male
-                            </label>
-                            <label>
-                                <input type="checkbox" name="femal" value="Female" id="female" /> Female
-                            </label>
+                        <div class="filter-box-section" id="gender-filter">
+                            <!-- Gender Filter will be displayed here -->
                         </div>
                     </div>
                     <div class="col-lg-12 col-12 filter-box">
                         <h2>Origin</h2>
-                        <div class="filter-box-section">
-                            <label>
-                                <input type="checkbox" name="male" value="Male" id="male" /> Unkown
-                            </label>
-                            <label>
-                                <input type="checkbox" name="femal" value="Female" id="female" /> Nupia 4
-                            </label>
+                        <div class="filter-box-section" id="origin-filter">
+                            <!-- Origin Filter will be displayed here -->
                         </div>
                     </div>
                 </form>
@@ -94,138 +76,7 @@
                 </div>
             </div>
             <div class="row result-row search-results">
-                <div class="col-lg-3 col-6">
-                    <div class="result-card">
-                        <figure>
-                            <img class="responsive-img" src="./src/assests/dummy.png" alt="Trulli">
-                            <figcaption>
-                                <h3>Eli's Girlfriend</h3>
-                                <div class="small-font">id: <span>111</span> - created <span>2 years ago</span></div>
-                            </figcaption>
-                        </figure>
-                        <div class="result-card-details small-font">
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">STATUS</span>
-                                <span class="result-attribute-data">Alive</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">SPECIES</span>
-                                <span class="result-attribute-data">Human</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">GENDER</span>
-                                <span class="result-attribute-data">Female</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">ORIGIN</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">LAST LOCATION</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="result-card">
-                        <figure>
-                            <img class="responsive-img" src="./src/assests/dummy.png" alt="Trulli">
-                            <figcaption>
-                                <h3>Eli's Girlfriend</h3>
-                                <div class="small-font">id: <span>111</span> - created <span>2 years ago</span></div>
-                            </figcaption>
-                        </figure>
-                        <div class="result-card-details small-font">
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">STATUS</span>
-                                <span class="result-attribute-data">Alive</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">SPECIES</span>
-                                <span class="result-attribute-data">Human</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">GENDER</span>
-                                <span class="result-attribute-data">Female</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">ORIGIN</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">LAST LOCATION</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="result-card">
-                        <figure>
-                            <img class="responsive-img" src="./src/assests/dummy.png" alt="Trulli">
-                            <figcaption>
-                                <h3>Eli's Girlfriend</h3>
-                                <div class="small-font">id: <span>111</span> - created <span>2 years ago</span></div>
-                            </figcaption>
-                        </figure>
-                        <div class="result-card-details small-font">
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">STATUS</span>
-                                <span class="result-attribute-data">Alive</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">SPECIES</span>
-                                <span class="result-attribute-data">Human</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">GENDER</span>
-                                <span class="result-attribute-data">Female</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">ORIGIN</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">LAST LOCATION</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="result-card">
-                        <figure>
-                            <img class="responsive-img" src="./src/assests/dummy.png" alt="Trulli">
-                            <figcaption>
-                                <h3>Eli's Girlfriend</h3>
-                                <div class="small-font">id: <span>111</span> - created <span>2 years ago</span></div>
-                            </figcaption>
-                        </figure>
-                        <div class="result-card-details small-font">
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">STATUS</span>
-                                <span class="result-attribute-data">Alive</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">SPECIES</span>
-                                <span class="result-attribute-data">Human</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">GENDER</span>
-                                <span class="result-attribute-data">Female</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">ORIGIN</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">LAST LOCATION</span>
-                                <span class="result-attribute-data">Post-Apocalyptic Earth</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Results Card will be displayed here -->
             </div>
         </div>
     </main>
