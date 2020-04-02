@@ -3,45 +3,43 @@ import './scss/app.scss';
 import $ from 'jquery';
 import * as account from './modules/accounts';
 
-(function($) {
-        
+(function ($) {
+
     const species = new Set();
     const gender = new Set();
     const origin = new Set();
 
     const resultApi = 'https://rickandmortyapi.com/api/character/';
 
-
     async function getResults() {
 
-        let promise = new Promise((resolve, reject) => {
-            $.get(resultApi, function( data ) {
-                if(data && data.results) {
-                    resolve(setUIdata(data.results));                    
+        const promise = new Promise((resolve, reject) => {
+            $.get(resultApi, function (data) {
+                if (data && data.results) {
+                    resolve(setUIdata(data.results));
                 } else {
                     reject('Something Went Wrong.');
                 }
             });
         });
-        
+
         const result = await promise;
+        const resultData = result.card;
         const filters = {
-            species : [...result.filters.species],
-            gender : [...result.filters.gender],
-            origin : [...result.filters.origin]
+            species: [...result.filters.species],
+            gender: [...result.filters.gender],
+            origin: [...result.filters.origin]
         }
 
-        populateFilters(filters.species, '#species-filter');
-        populateFilters(filters.gender, '#gender-filter');
-        populateFilters(filters.origin, '#origin-filter');
+        populateFilters(filters);
 
-        console.log(result.card);
+        populateCardData(resultData);
 
-        populateCardData(result.card);
+        getCheckedFilters(resultData);
     }
 
-    getResults(); 
-    
+    getResults();
+
     const setUIdata = (data) => {
         const res = {};
         res['card'] = data;
@@ -64,14 +62,33 @@ import * as account from './modules/accounts';
         };
     }
 
-    const populateFilters = (filterData, filterType) => {
-        filterData.map((filter) => {
-            $(filterType).append(`
-                <label for="${filter}">
-                    <input type="checkbox" name="${filter}" value="${filter}" id="${filter}" /> ${filter}
-                </label>
+    const populateFilters = (filters) => {
+        const filterForm = $('#filter-form');
+        filterForm.html('');
+        for (const property in filters) {
+            console.log(`${property}: ${filters[property]}`);
+
+            filterForm.append(`
+                <div class="col-lg-12 col-12 filter-box">
+                    <h2>${property}</h2>
+                    <div class="filter-box-section" id="${property}-filter">
+                        <!-- Filter checkboxes will be displayed here -->
+                    </div>
+                </div>
             `);
-        });
+
+            const filterType = '#' + property + '-filter';
+            const filterTypeElem = $(filterType);
+
+            filters[property].map((filter) => {
+                $(filterTypeElem).append(`
+                    <label for="${filter}">
+                        <input class="filter-checkbox" type="checkbox" name="${property}" value="${filter}" id="${filter}" /> ${filter}
+                    </label>
+                `);
+            });
+
+        }
     }
 
     const populateCardData = (items) => {
@@ -114,6 +131,72 @@ import * as account from './modules/accounts';
                 </div>
             `);
         });
+    }
+
+    const getCheckedFilters = (resultData) => {
+
+        const filterCheckBox = $('.filter-checkbox');
+        let selectedFilters = {};
+
+        filterCheckBox.on('change', async function () {
+
+            if (filterCheckBox.filter(':checked').length != 0) {
+                const promise = new Promise((resolve, reject) => {
+                    filterCheckBox.filter(':checked').each(() => {
+
+                        if (!selectedFilters.hasOwnProperty(this.name)) {
+                            selectedFilters[this.name] = new Set();
+                        }
+
+                        if (this.checked) {
+                            selectedFilters[this.name].add(this.value);
+                        } else if (selectedFilters[this.name].has(this.value)) {
+                            selectedFilters[this.name].delete(this.value);
+                        }
+
+                        if (selectedFilters[this.name].size === 0) {
+                            delete selectedFilters[this.name];
+                        }
+
+                        resolve(selectedFilters);
+
+                    });
+                });
+
+                const filters = await promise;
+                const checkedFilters = {};
+                for (let filter in filters) {
+                    checkedFilters[filter] = [...filters[filter]];
+                }
+
+                console.log(checkedFilters);
+                filterSearchResults(checkedFilters, 'checkbox', resultData);
+
+            } else {
+                selectedFilters = {};
+            }
+
+        });
+    }
+
+    const filterSearchResults = (filters, type, resultdata) => {
+        let filteredData = [];
+        if (type === 'checkbox') {
+            resultdata.map((data) => {
+                for (let filterName in filters) {
+                    filters[filterName].map((filter) => {
+                        if (filter === data[filterName]) {
+                            filteredData.push(data);
+                        } else if(data[filterName]['name'] && filter === data[filterName]['name']) {
+                            filteredData.push(data);
+                        }
+                    });
+                }
+            });
+        }
+
+        console.log(filteredData);
+
     }
 
 })($);
