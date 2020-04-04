@@ -39,7 +39,7 @@
             <div class="row search-box result-row">
                 <div class="col-lg-6 col-12">                    
                     <label for="search-by-name">Search By Name</label>
-                    <form class="form-inline">
+                    <form class="form-inline" id="search-by-name-form">
                         <div class="form-group">
                             <input type="text" class="form-control" id="search-by-name">
                         </div>
@@ -47,12 +47,12 @@
                     </form>
                 </div>
                 <div class="col-lg-3 col-12">
-                    <form class="sort-by-form">
+                    <form class="sort-by-form" id="sort-by-form">
                         <div class="form-group">
                             <select class="form-control" id="sort-by">
-                                <option>Sort by ID</option>
-                                <option>Ascending</option>
-                                <option>Descending</option>
+                                <option value="">Sort by ID</option>
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
                             </select>
                         </div>
                     </form>

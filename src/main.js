@@ -11,6 +11,19 @@ import * as account from './modules/accounts';
 
     const resultApi = 'https://rickandmortyapi.com/api/character/';
 
+    $(document).ready(function () {
+        $('#search-by-name-form').on('submit', function (e) {
+            e.preventDefault();
+            const searchKeyWord = $('#search-by-name').val();
+            serachByName(searchKeyWord);
+        });
+
+        $('#sort-by').on('change', function () {
+            const sortingOrder = $('#sort-by').val();
+            sortResults(sortingOrder);
+        });
+    })
+
     async function getResults() {
 
         const promise = new Promise((resolve, reject) => {
@@ -35,7 +48,9 @@ import * as account from './modules/accounts';
 
         populateCardData(resultData);
 
-        getCheckedFilters(resultData);
+        localStorage.setItem('originalData', JSON.stringify(resultData));
+        getCheckedFilters();
+
     }
 
     getResults();
@@ -82,8 +97,8 @@ import * as account from './modules/accounts';
 
             filters[property].map((filter) => {
                 $(filterTypeElem).append(`
-                    <label for="${filter}">
-                        <input class="filter-checkbox" type="checkbox" name="${property}" value="${filter}" id="${filter}" /> ${filter}
+                    <label for="${property}-${filter}">
+                        <input class="filter-checkbox" type="checkbox" name="${property}" value="${filter}" id="${property}-${filter}" /> ${filter}
                     </label>
                 `);
             });
@@ -94,46 +109,57 @@ import * as account from './modules/accounts';
     const populateCardData = (items) => {
         const cards = $('.search-results');
         cards.html('');
-        items.map((item) => {
-            cards.append(`
-                <div class="col-lg-3 col-6">
-                    <div class="result-card">
-                        <figure>
-                            <img class="responsive-img" src="${item.image}" alt="${item.name}">
-                            <figcaption>
-                                <h3>${item.name}</h3>
-                                <div class="small-font">id: <span>${item.id}</span> - created <span>2 years ago</span></div>
-                            </figcaption>
-                        </figure>
-                        <div class="result-card-details small-font">
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">STATUS</span>
-                                <span class="result-attribute-data">${item.status}</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">SPECIES</span>
-                                <span class="result-attribute-data">${item.species}</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">GENDER</span>
-                                <span class="result-attribute-data">${item.gender}</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">ORIGIN</span>
-                                <span class="result-attribute-data">${item.origin.name}</span>
-                            </div>
-                            <div class="result-attribute">
-                                <span class="result-attribute-name">LAST LOCATION</span>
-                                <span class="result-attribute-data">${item.location.name}</span>
+        if (items.length > 0) {
+            items.map((item) => {
+                cards.append(`
+                    <div class="col-lg-3 col-6">
+                        <div class="result-card">
+                            <figure>
+                                <img class="responsive-img" src="${item.image}" alt="${item.name}">
+                                <figcaption>
+                                    <h3>${item.name}</h3>
+                                    <div class="small-font">id: <span>${item.id}</span> - created <span>2 years ago</span></div>
+                                </figcaption>
+                            </figure>
+                            <div class="result-card-details small-font">
+                                <div class="result-attribute">
+                                    <span class="result-attribute-name">STATUS</span>
+                                    <span class="result-attribute-data">${item.status}</span>
+                                </div>
+                                <div class="result-attribute">
+                                    <span class="result-attribute-name">SPECIES</span>
+                                    <span class="result-attribute-data">${item.species}</span>
+                                </div>
+                                <div class="result-attribute">
+                                    <span class="result-attribute-name">GENDER</span>
+                                    <span class="result-attribute-data">${item.gender}</span>
+                                </div>
+                                <div class="result-attribute">
+                                    <span class="result-attribute-name">ORIGIN</span>
+                                    <span class="result-attribute-data">${item.origin.name}</span>
+                                </div>
+                                <div class="result-attribute">
+                                    <span class="result-attribute-name">LAST LOCATION</span>
+                                    <span class="result-attribute-data">${item.location.name}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `);
-        });
+                `);
+            });
+        } else {
+            cards.append(`
+                    <div class="col-lg-12">
+                        <div class="result-card">
+                            <h4>No Result Found</h4>
+                        <div>
+                    </div>
+                `);
+        }
+
     }
 
-    const getCheckedFilters = (resultData) => {
+    const getCheckedFilters = () => {
 
         const filterCheckBox = $('.filter-checkbox');
         let selectedFilters = {};
@@ -168,9 +194,9 @@ import * as account from './modules/accounts';
                 for (let filter in filters) {
                     checkedFilters[filter] = [...filters[filter]];
                 }
-
-                console.log(checkedFilters);
-                filterSearchResults(checkedFilters, 'checkbox', resultData);
+                let resultdata = JSON.parse(localStorage.getItem('originalData'));
+                const searchResults = filterSearchResults(resultdata, checkedFilters);
+                populateCardData(searchResults);
 
             } else {
                 selectedFilters = {};
@@ -179,25 +205,53 @@ import * as account from './modules/accounts';
         });
     }
 
-    const filterSearchResults = (filters, type, resultdata) => {
-        let filteredData = [];
-        if (type === 'checkbox') {
-            resultdata.map((data) => {
-                for (let filterName in filters) {
-                    filters[filterName].map((filter) => {
-                        if (filter === data[filterName]) {
-                            filteredData.push(data);
-                        } else if(data[filterName]['name'] && filter === data[filterName]['name']) {
-                            filteredData.push(data);
-                        }
-                    });
-                }
+    const checkValue = value => (typeof value === 'string' ? value.toUpperCase() : value);
+
+    const filterSearchResults = (data, filters) => {
+        const filterKeys = Object.keys(filters);
+        return data.filter(item => {
+            return filterKeys.every(key => {
+                if (!filters[key].length) return true;
+                return filters[key].find((filter) => {
+                    if (typeof item[key] === 'object') {
+                        return checkValue(filter) === checkValue(item[key]['name']);
+                    } else {
+                        return checkValue(filter) === checkValue(item[key])
+                    }
+                });
+            });
+        });
+    }
+
+
+    const serachByName = (name) => {
+        const results = JSON.parse(localStorage.getItem('originalData'));
+        const serachResults = results.filter((res) => {
+            const regx = new RegExp(name.toLowerCase());
+            const resNameCheck = res.name.toLowerCase().match(regx);
+            return resNameCheck !== null;
+        });
+
+        populateCardData(serachResults);
+    }
+
+    const sortResults = (order) => {
+        const sortedResults = [];
+        const results = JSON.parse(localStorage.getItem('originalData'));
+        if (order === 'asc') {
+            results.sort((a, b) => {
+                return a.id - b.id;
+            });
+        } else if (order === "desc") {
+            results.sort((a, b) => {
+                return b.id - a.id;
             });
         }
 
-        console.log(filteredData);
-
+        populateCardData(results);
     }
+
+
 
 })($);
 
