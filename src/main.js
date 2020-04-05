@@ -1,35 +1,49 @@
 import 'bootstrap';
 import './scss/app.scss';
 import $ from 'jquery';
-import * as account from './modules/accounts';
+import * as filter from './modules/filters';
+import * as util from './modules/utility';
 
 (function ($) {
 
-    const species = new Set();
-    const gender = new Set();
-    const origin = new Set();
     let isDataFiltered = false;
 
-    const resultApi = 'https://rickandmortyapi.com/api/character/';
-
     $(document).ready(function () {
+        
+        $('#clear-search-btn').hide();
         $('#search-by-name-form').on('submit', function (e) {
             e.preventDefault();
             const searchKeyWord = $('#search-by-name').val();
             serachByName(searchKeyWord);
+            $('#clear-search-btn').show();
         });
 
         $('#sort-by').on('change', function () {
             const sortingOrder = $('#sort-by').val();
             sortResults(sortingOrder);
         });
+
+        $('#clear-search-btn').on('click', function(e) {
+            e.preventDefault();
+            let resultData = [];
+
+            if(!isDataFiltered) {
+                resultData = util.getDataFromLocalStorage('originalData');
+            } else {
+                resultData = util.getDataFromLocalStorage('filteredData');
+            }
+
+            $('#search-by-name').val('');
+            populateCardData(resultData);            
+            $('#clear-search-btn').hide();
+        })
     })
 
     // Get data from the service
     async function getResults() {
 
         const promise = new Promise((resolve, reject) => {
-            $.get(resultApi, function (data) {
+            $.get(util.resultApi, function (data) {
                 if (data && data.results) {
                     resolve(setUIdata(data.results));
                 } else {
@@ -46,12 +60,12 @@ import * as account from './modules/accounts';
             origin: [...result.filters.origin]
         }
 
-        populateFilters(filters);
+        filter.populateFilters(filters);
 
         populateCardData(resultData);
 
         //[TODO] Redux store can be used to save the app state
-        setDataToLocalStorage('originalData', resultData);
+        util.setDataToLocalStorage('originalData', resultData);
         getCheckedFilters();
 
     }
@@ -62,49 +76,9 @@ import * as account from './modules/accounts';
         const res = {};
         res['card'] = data;
         data.map((item) => {
-            res['filters'] = addFilters(item);
+            res['filters'] = filter.addFilters(item);
         });
         return res;
-    }
-
-    const addFilters = (item) => {
-        species.add(item.species);
-        gender.add(item.gender);
-        origin.add(item.origin.name);
-
-        return {
-            species,
-            gender,
-            origin
-        };
-    }
-
-    const populateFilters = (filters) => {
-        const filterForm = $('#filter-form');
-        filterForm.html('');
-        for (const property in filters) {
-
-            filterForm.append(`
-                <div class="col-lg-12 col-12 filter-box">
-                    <h2>${property}</h2>
-                    <div class="filter-box-section" id="${property}-filter">
-                        <!-- Filter checkboxes will be displayed here -->
-                    </div>
-                </div>
-            `);
-
-            const filterType = '#' + property + '-filter';
-            const filterTypeElem = $(filterType);
-
-            filters[property].map((filter) => {
-                $(filterTypeElem).append(`
-                    <label for="${property}-${filter}">
-                        <input class="filter-checkbox" type="checkbox" name="${property}" value="${filter}" id="${property}-${filter}" /> ${filter}
-                    </label>
-                `);
-            });
-
-        }
     }
 
     const populateCardData = (items) => {
@@ -167,7 +141,7 @@ import * as account from './modules/accounts';
 
         const filterCheckBox = $('.filter-checkbox');
         let selectedFilters = {};
-        let resultdata = getDataFromLocalStorage('originalData');
+        let resultdata = util.getDataFromLocalStorage('originalData');
 
         filterCheckBox.on('change', async function () {
 
@@ -199,53 +173,34 @@ import * as account from './modules/accounts';
                 for (let filter in filters) {
                     checkedFilters[filter] = [...filters[filter]];
                 }
-                const searchResults = filterSearchResults(resultdata, checkedFilters);
+                const searchResults = filter.filterSearchResults(resultdata, checkedFilters);
 
                 //[TODO] Redux store can be used instead
-                setDataToLocalStorage('filteredData', searchResults);
-                setDataToLocalStorage('selectedFilters', checkedFilters);
+                util.setDataToLocalStorage('filteredData', searchResults);
+                util.setDataToLocalStorage('selectedFilters', checkedFilters);
 
                 isDataFiltered = true;
                 populateCardData(searchResults);
-                populateAppliedFilter(checkedFilters);
+                filter.populateAppliedFilter(checkedFilters);
 
             } else {
                 selectedFilters = {};
-                const searchResults = filterSearchResults(resultdata, {});
+                const searchResults = filter.filterSearchResults(resultdata, {});
 
                 //[TODO] Redux store can be used instead
-                setDataToLocalStorage('filteredData', searchResults);
-                setDataToLocalStorage('selectedFilters', {});
+                util.setDataToLocalStorage('filteredData', searchResults);
+                util.setDataToLocalStorage('selectedFilters', {});
 
                 isDataFiltered = false;
                 populateCardData(searchResults);
-                populateAppliedFilter({});
+                filter.populateAppliedFilter({});
             }
 
         });
     }
 
-    const checkValue = value => (typeof value === 'string' ? value.toUpperCase() : value);
-
-    const filterSearchResults = (data, filters) => {
-        const filterKeys = Object.keys(filters);
-        return data.filter(item => {
-            return filterKeys.every(key => {
-                if (!filters[key].length) return true;
-                return filters[key].find((filter) => {
-                    if (typeof item[key] === 'object') {
-                        return checkValue(filter) === checkValue(item[key]['name']);
-                    } else {
-                        return checkValue(filter) === checkValue(item[key])
-                    }
-                });
-            });
-        });
-    }
-
-
     const serachByName = (name) => {
-        let results = isDataFiltered ? getDataFromLocalStorage('filteredData') : getDataFromLocalStorage('originalData');
+        let results = isDataFiltered ? util.getDataFromLocalStorage('filteredData') : util.getDataFromLocalStorage('originalData');
         const serachResults = results.filter((res) => {
             const regx = new RegExp(name.toLowerCase());
             const resNameCheck = res.name.toLowerCase().match(regx);
@@ -256,7 +211,7 @@ import * as account from './modules/accounts';
     }
 
     const sortResults = (order) => {
-        let results = isDataFiltered ? getDataFromLocalStorage('filteredData') : getDataFromLocalStorage('originalData');
+        let results = isDataFiltered ? util.getDataFromLocalStorage('filteredData') : util.getDataFromLocalStorage('originalData');
         if (order === 'asc') {
             results.sort((a, b) => {
                 return a.id - b.id;
@@ -268,32 +223,6 @@ import * as account from './modules/accounts';
         }
 
         populateCardData(results);
-    }
-
-    const setDataToLocalStorage = (keyName, data) => {
-        localStorage.setItem(keyName, JSON.stringify(data));
-    }
-
-    const getDataFromLocalStorage = (keyName) => {
-        return JSON.parse(localStorage.getItem(keyName));
-    }
-
-    const populateAppliedFilter = (filters) => {
-        const filterKeys = Object.keys(filters);
-        $('.selected-filters').html('');
-        if (filterKeys.length > 0) {
-            for (let filter in filters) {
-                filters[filter].map((filterName) => {
-                    $('.selected-filters').append(`
-                        <div class="col-lg-2 col-4 applied-filter-container">
-                            <div class="applied-filter">
-                                <span>${filterName}</span>
-                            </div>
-                        </div>
-                    `);
-                });
-            }
-        }
     }
 
 })($);

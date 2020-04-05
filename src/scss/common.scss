@@ -13,9 +13,12 @@ form {
     width: 100%;
 }
 
+.btn {    
+    border-radius: 0;
+}
+
 .btn-default {
     border: 1px solid $grey-2;
-    border-radius: 0;
     background-color: $grey-1;
     color: $black;
 }
@@ -38,7 +41,7 @@ form {
     }   
 
     #search-by-name {
-        width: 335px;
+        width: 275px;
     }
 }
 
