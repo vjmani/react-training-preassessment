@@ -8,6 +8,7 @@ import * as account from './modules/accounts';
     const species = new Set();
     const gender = new Set();
     const origin = new Set();
+    let isDataFiltered = false;
 
     const resultApi = 'https://rickandmortyapi.com/api/character/';
 
@@ -24,6 +25,7 @@ import * as account from './modules/accounts';
         });
     })
 
+    // Get data from the service
     async function getResults() {
 
         const promise = new Promise((resolve, reject) => {
@@ -48,7 +50,8 @@ import * as account from './modules/accounts';
 
         populateCardData(resultData);
 
-        localStorage.setItem('originalData', JSON.stringify(resultData));
+        //[TODO] Redux store can be used to save the app state
+        setDataToLocalStorage('originalData', resultData);
         getCheckedFilters();
 
     }
@@ -61,7 +64,6 @@ import * as account from './modules/accounts';
         data.map((item) => {
             res['filters'] = addFilters(item);
         });
-        console.log(res);
         return res;
     }
 
@@ -81,7 +83,6 @@ import * as account from './modules/accounts';
         const filterForm = $('#filter-form');
         filterForm.html('');
         for (const property in filters) {
-            console.log(`${property}: ${filters[property]}`);
 
             filterForm.append(`
                 <div class="col-lg-12 col-12 filter-box">
@@ -111,6 +112,9 @@ import * as account from './modules/accounts';
         cards.html('');
         if (items.length > 0) {
             items.map((item) => {
+                const createdYear = new Date(item.created).getFullYear();
+                const currentYear = new Date().getFullYear();
+                const yearDiff = currentYear - createdYear;
                 cards.append(`
                     <div class="col-lg-3 col-6">
                         <div class="result-card">
@@ -118,7 +122,7 @@ import * as account from './modules/accounts';
                                 <img class="responsive-img" src="${item.image}" alt="${item.name}">
                                 <figcaption>
                                     <h3>${item.name}</h3>
-                                    <div class="small-font">id: <span>${item.id}</span> - created <span>2 years ago</span></div>
+                                    <div class="small-font">id: <span>${item.id}</span> - created <span>${yearDiff} years ago</span></div>
                                 </figcaption>
                             </figure>
                             <div class="result-card-details small-font">
@@ -163,6 +167,7 @@ import * as account from './modules/accounts';
 
         const filterCheckBox = $('.filter-checkbox');
         let selectedFilters = {};
+        let resultdata = getDataFromLocalStorage('originalData');
 
         filterCheckBox.on('change', async function () {
 
@@ -194,12 +199,27 @@ import * as account from './modules/accounts';
                 for (let filter in filters) {
                     checkedFilters[filter] = [...filters[filter]];
                 }
-                let resultdata = JSON.parse(localStorage.getItem('originalData'));
                 const searchResults = filterSearchResults(resultdata, checkedFilters);
+
+                //[TODO] Redux store can be used instead
+                setDataToLocalStorage('filteredData', searchResults);
+                setDataToLocalStorage('selectedFilters', checkedFilters);
+
+                isDataFiltered = true;
                 populateCardData(searchResults);
+                populateAppliedFilter(checkedFilters);
 
             } else {
                 selectedFilters = {};
+                const searchResults = filterSearchResults(resultdata, {});
+
+                //[TODO] Redux store can be used instead
+                setDataToLocalStorage('filteredData', searchResults);
+                setDataToLocalStorage('selectedFilters', {});
+
+                isDataFiltered = false;
+                populateCardData(searchResults);
+                populateAppliedFilter({});
             }
 
         });
@@ -225,7 +245,7 @@ import * as account from './modules/accounts';
 
 
     const serachByName = (name) => {
-        const results = JSON.parse(localStorage.getItem('originalData'));
+        let results = isDataFiltered ? getDataFromLocalStorage('filteredData') : getDataFromLocalStorage('originalData');
         const serachResults = results.filter((res) => {
             const regx = new RegExp(name.toLowerCase());
             const resNameCheck = res.name.toLowerCase().match(regx);
@@ -236,8 +256,7 @@ import * as account from './modules/accounts';
     }
 
     const sortResults = (order) => {
-        const sortedResults = [];
-        const results = JSON.parse(localStorage.getItem('originalData'));
+        let results = isDataFiltered ? getDataFromLocalStorage('filteredData') : getDataFromLocalStorage('originalData');
         if (order === 'asc') {
             results.sort((a, b) => {
                 return a.id - b.id;
@@ -251,7 +270,31 @@ import * as account from './modules/accounts';
         populateCardData(results);
     }
 
+    const setDataToLocalStorage = (keyName, data) => {
+        localStorage.setItem(keyName, JSON.stringify(data));
+    }
 
+    const getDataFromLocalStorage = (keyName) => {
+        return JSON.parse(localStorage.getItem(keyName));
+    }
+
+    const populateAppliedFilter = (filters) => {
+        const filterKeys = Object.keys(filters);
+        $('.selected-filters').html('');
+        if (filterKeys.length > 0) {
+            for (let filter in filters) {
+                filters[filter].map((filterName) => {
+                    $('.selected-filters').append(`
+                        <div class="col-lg-2 col-4 applied-filter-container">
+                            <div class="applied-filter">
+                                <span>${filterName}</span>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+        }
+    }
 
 })($);
 
